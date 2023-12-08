@@ -4,130 +4,119 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.myapplication.components.navBar
+import com.example.myapplication.database.entities.Card
 import com.example.myapplication.ui.theme.SkyBlue
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    Column {
-        Box(modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .fillMaxHeight(0.9f)) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                ListItem(
-                    name = "Ламборджини Авентадор 2010",
-                    mileage = 4765,
-                    location = "Россия, г. Ульяновск",
-                    price = 5000000,
-                    imageResourceId = com.example.myapplication.R.drawable.lambo_car1,
-                    navController = navController
-                )
-                ListItem(
-                    name = "Оранжевый Москвич 1983",
-                    mileage = 522011,
-                    location = "Россия, г. Москва",
-                    price = 125000,
-                    imageResourceId = com.example.myapplication.R.drawable.moscowich_car3,
-                    navController = navController
-                )
-                ListItem(
-                    name = "Феррари Лаферрари 2013",
-                    mileage = 17698,
-                    location = "Италия, г. Неаполь",
-                    price = 1249990,
-                    imageResourceId = com.example.myapplication.R.drawable.ferrari_laferrari_car2,
-                    navController = navController
-                )
-                ListItem(
-                    name = "Оранжевый Москвич 1983",
-                    mileage = 522011,
-                    location = "Россия, г. Москва",
-                    price = 125000,
-                    imageResourceId = com.example.myapplication.R.drawable.moscowich_car3,
-                    navController = navController
-                )
-                ListItem(
-                    name = "Феррари Лаферрари 2013",
-                    mileage = 17698,
-                    location = "Италия, г. Неаполь",
-                    price = 1249990,
-                    imageResourceId = com.example.myapplication.R.drawable.ferrari_laferrari_car2,
-                    navController = navController
-                )
+    val context = LocalContext.current
+    val cards = remember { mutableStateListOf<Card>() }
+
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            MobileAppDataBase.getInstance(context).cardDao().getAll().collect { data ->
+                cards.clear()
+                cards.addAll(data)
             }
         }
-        Column(modifier = Modifier
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        DataListScroll(navController, cards)
+    }
+
+    Column(
+        modifier = Modifier
             .fillMaxSize()
             .background(SkyBlue),
-            verticalArrangement = Arrangement.Center) {
-            navBar(navController = navController)
-        }
+        verticalArrangement = Arrangement.Center
+    ) {
+        navBar(navController = navController)
     }
 }
 
-@Composable
-private fun ListItem(name: String,
-                     mileage: Int,
-                     location: String,
-                     price: Int,
-                     imageResourceId: Int,
-                     navController: NavHostController) {
-    var borderColor = remember { mutableStateOf(Color.Gray) }
+/*@Composable
+private fun ListItem(
+    card: Card,
+    navController: NavHostController
+) {
+    val bitmap = remember(card) {
+        BitmapFactory.decodeByteArray(card.image, 0, card.image.size)
+    }
+
+    val imageBitmap = remember(bitmap) {
+        bitmap.asImageBitmap()
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)
-            .border(2.dp, borderColor.value, RoundedCornerShape(15.dp))
-            .clickable { borderColor.value = Color.LightGray },
+            .border(2.dp, Color.Gray, RoundedCornerShape(15.dp)),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-    ){
-        Box() {
-            Row(verticalAlignment = Alignment.CenterVertically){
+    ) {
+        Box {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = imageResourceId),
+                    painter = remember {
+                        BitmapPainter(imageBitmap)
+                    },
                     contentDescription = "image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(128.dp))
-                Column (
-                    modifier = Modifier.padding(5.dp)) {
-                    Text(text = name, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold)
-                    Text(text = "Пробег: " + mileage)
-                    Text(text = "Расположение: " + location)
-                    Text(text = "Цена: " + price)
+                    modifier = Modifier.size(128.dp)
+                )
+                Column(
+                    modifier = Modifier.padding(5.dp)
+                ) {
+                    Text(text = card.name, fontWeight = FontWeight.Bold)
+                    Text(text = "Пробег: ${card.mileage}")
+                    Text(text = "Расположение: ${card.location}")
+                    Text(text = "Цена: ${card.price}")
                     Button(onClick = { navController.navigate("editCard") }) {
                         Text("Изменить")
                     }
@@ -136,7 +125,216 @@ private fun ListItem(name: String,
                     }
                 }
             }
+        }
+    }
+}*/
 
+@Composable
+fun <T : Any> DataListScroll(navController: NavHostController, dataList: List<T>){
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        item {
+            when {
+                dataList.isListOf<Card>() -> addNewListItem(navController, "editcard")
+
+            }
+        }
+        items(dataList){ item ->
+            when(item){
+                is Card -> CardListItem(item = item, navController = navController)
+            }
         }
     }
 }
+
+inline fun <reified T> List<*>.isListOf(): Boolean {
+    return isNotEmpty() && all { it is T }
+}
+
+
+@Composable
+fun CardListItem(item: Card, navController: NavHostController){
+    val context = LocalContext.current
+
+    val isExpanded = remember {
+        mutableStateOf(false)
+    }
+
+    val showDialog = remember {
+        mutableStateOf(false)
+    }
+
+    val delete = remember {
+        mutableStateOf(false)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .border(2.dp, Color.Gray, RoundedCornerShape(15.dp)),
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top
+            ){
+                Image(bitmap = item.image.asImageBitmap(),
+                    contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(128.dp)
+                        .height(256.dp))
+                Column (
+                    modifier = Modifier.padding(8.dp)
+                ){
+                    Text(
+                        text = "${item.name} | ${item.location} | ${item.mileage} | ${item.price}",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = isExpanded.value,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ){
+                    DataListItemButton("Изменить", Color.Yellow, Color.White, onClickAction = {
+                        navController.navigate("editstory/${item.id}")
+                    })
+                    DataListItemButton("Удалить", Color.Red, Color.White, onClickAction = {
+                        showDialog.value = !showDialog.value
+                    })
+                }
+            }
+        }
+    }
+
+    if(showDialog.value) {
+        DialogWindow(label = "Подтверждение",
+            message = "Вы уверены что хотите удалить запись?", onConfirmAction = {
+                delete.value = !delete.value
+                showDialog.value = !showDialog.value
+            }, onDismissAction = {
+                showDialog.value = !showDialog.value
+            })
+    }
+
+    if(delete.value) {
+        LaunchedEffect(Unit){
+            withContext(Dispatchers.IO){
+                MobileAppDataBase.getInstance(context).cardDao().delete(item)
+            }
+        }
+        delete.value = !delete.value
+        navController.navigate("story")
+    }
+}
+
+
+@Composable
+fun DataListItemButton(label: String, backgroundColor: Color, textColor: Color, onClickAction: () -> Unit){
+    Button(
+        onClick = onClickAction,
+        modifier = Modifier.requiredHeight(64.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor
+        )
+    ) {
+        Text(
+            text = label,
+            color = textColor,
+            fontSize = 18.sp,
+        )
+    }
+}
+
+@Composable
+fun DialogWindow(label: String, message: String, onConfirmAction: () -> Unit, onDismissAction: () -> Unit){
+    AlertDialog(onDismissRequest = onDismissAction,
+        title = {
+            Text(text = label,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Text(text = message)
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirmAction,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Green
+                ),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text(text = "Подтвердить",
+                    color = Color.White)
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismissAction,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                ),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text(text = "Отмена",
+                    color = Color.Black)
+            }
+        }
+    )
+}
+
+@Composable
+fun addNewListItem(navController: NavHostController, destination: String){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, top = 8.dp, end = 18.dp, bottom = 8.dp)
+            .clickable {
+                navController.navigate(destination)
+            },
+        shape = RoundedCornerShape(15.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Magenta
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Image(painter = painterResource(id = R.drawable.login),
+                    contentDescription = "additem",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(96.dp)
+                        .padding(8.dp))
+                Text(
+                    text = "Добавить",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 32.dp))
+            }
+        }
+    }
+}
+
