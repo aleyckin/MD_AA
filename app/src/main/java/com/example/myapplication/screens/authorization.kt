@@ -1,5 +1,6 @@
 package com.example.myapplication.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,9 +43,14 @@ fun Authorization(navController: NavHostController){
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            MobileAppDataBase.getInstance(context).userDao().getAll().collect { data ->
-                users.clear()
-                users.addAll(data)
+            try {
+                val database = MobileAppDataBase.getInstance(context.applicationContext)
+                database.userDao().getAll().collect { data ->
+                    users.clear()
+                    users.addAll(data)
+                }
+            } catch (e: Exception) {
+                Log.e("DatabaseError", "Error accessing database", e)
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.myapplication.database
+package com.example.myapplication.database.entities
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

@@ -1,5 +1,6 @@
 package com.example.myapplication.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,8 +26,10 @@ import com.example.myapplication.database.entities.Card
 import com.example.myapplication.ui.theme.SkyBlue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,11 +43,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -54,80 +60,39 @@ fun MainScreen(navController: NavHostController) {
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            MobileAppDataBase.getInstance(context).cardDao().getAll().collect { data ->
-                cards.clear()
-                cards.addAll(data)
-            }
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        DataListScroll(navController, cards)
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SkyBlue),
-        verticalArrangement = Arrangement.Center
-    ) {
-        navBar(navController = navController)
-    }
-}
-
-/*@Composable
-private fun ListItem(
-    card: Card,
-    navController: NavHostController
-) {
-    val bitmap = remember(card) {
-        BitmapFactory.decodeByteArray(card.image, 0, card.image.size)
-    }
-
-    val imageBitmap = remember(bitmap) {
-        bitmap.asImageBitmap()
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-            .border(2.dp, Color.Gray, RoundedCornerShape(15.dp)),
-        shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-    ) {
-        Box {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = remember {
-                        BitmapPainter(imageBitmap)
-                    },
-                    contentDescription = "image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(128.dp)
-                )
-                Column(
-                    modifier = Modifier.padding(5.dp)
-                ) {
-                    Text(text = card.name, fontWeight = FontWeight.Bold)
-                    Text(text = "Пробег: ${card.mileage}")
-                    Text(text = "Расположение: ${card.location}")
-                    Text(text = "Цена: ${card.price}")
-                    Button(onClick = { navController.navigate("editCard") }) {
-                        Text("Изменить")
-                    }
-                    Button(onClick = { }) {
-                        Text("Удалить")
-                    }
+            try {
+                val database = MobileAppDataBase.getInstance(context.applicationContext)
+                database.cardDao().getAll().collect { data ->
+                    cards.clear()
+                    cards.addAll(data)
                 }
+            } catch (e: Exception) {
+                Log.e("DatabaseError", "Error accessing database", e)
             }
         }
     }
-}*/
+
+
+    Box() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .fillMaxHeight(0.9f)
+        ) {
+            DataListScroll(navController, cards)
+        }
+    }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SkyBlue)
+                .fillMaxHeight(0.1f),
+            verticalArrangement = Arrangement.Center
+        ) {
+            navBar(navController = navController)
+        }
+}
 
 @Composable
 fun <T : Any> DataListScroll(navController: NavHostController, dataList: List<T>){
