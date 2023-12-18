@@ -1,3 +1,5 @@
+package com.example.myapplication.database
+
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -23,22 +25,19 @@ abstract class MobileAppDataBase : RoomDatabase() {
     abstract fun cardDao(): CardDao
 
     companion object {
-        private const val DB_NAME: String = "my-db"
+        private const val DB_NAME: String = "my-db.db"
 
         @Volatile
         private var INSTANCE: MobileAppDataBase? = null
 
         fun getInstance(appContext: Context): MobileAppDataBase {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE?.let { return@let it } // Возвращаем INSTANCE, если он уже был создан
-
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     appContext,
                     MobileAppDataBase::class.java,
                     DB_NAME
                 )
-                    .fallbackToDestructiveMigration()
-                    .addCallback(object : RoomDatabase.Callback() {
+                    .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
                             CoroutineScope(Dispatchers.IO).launch {
@@ -46,12 +45,8 @@ abstract class MobileAppDataBase : RoomDatabase() {
                             }
                         }
                     })
-                    .also { INSTANCE = it.build() } // Сохраняем INSTANCE
                     .build()
-
-                Log.d("Database", "Database instance created")
-
-                instance // Возвращаем созданный instance
+                    .also { INSTANCE = it }
             }
         }
 
@@ -77,15 +72,41 @@ abstract class MobileAppDataBase : RoomDatabase() {
                 )
                 cardDao.insert(
                     Card(
-                        name = "Москоувич",
-                        location = "г. Москва",
+                        name = "Феррари Два",
+                        location = "г. Ульяновск",
                         image = BitmapFactory.decodeResource(
                             appContext.resources,
-                            R.drawable.moscowich_car3
+                            R.drawable.ferrari_laferrari_car2
                         ),
-                        mileage = 156771,
-                        price = 1000,
+                        mileage = 1233,
+                        price = 15000,
+                        userId = 2
+                    )
+                )
+                cardDao.insert(
+                    Card(
+                        name = "Феррари Имба",
+                        location = "г. Ульяновск",
+                        image = BitmapFactory.decodeResource(
+                            appContext.resources,
+                            R.drawable.ferrari_laferrari_car2
+                        ),
+                        mileage = 7322,
+                        price = 125000,
                         userId = 1
+                    )
+                )
+                cardDao.insert(
+                    Card(
+                        name = "Феррари Два",
+                        location = "г. Ульяновск",
+                        image = BitmapFactory.decodeResource(
+                            appContext.resources,
+                            R.drawable.ferrari_laferrari_car2
+                        ),
+                        mileage = 1233,
+                        price = 15000,
+                        userId = 2
                     )
                 )
             }

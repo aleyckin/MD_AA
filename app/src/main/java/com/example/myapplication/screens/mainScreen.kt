@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -48,6 +50,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
+import com.example.myapplication.database.MobileAppDataBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,38 +63,33 @@ fun MainScreen(navController: NavHostController) {
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            try {
-                val database = MobileAppDataBase.getInstance(context.applicationContext)
-                database.cardDao().getAll().collect { data ->
-                    cards.clear()
-                    cards.addAll(data)
-                }
-            } catch (e: Exception) {
-                Log.e("DatabaseError", "Error accessing database", e)
+            val database = MobileAppDataBase.getInstance(context)
+            database.cardDao().getAll().collect { data ->
+                cards.clear()
+                data.forEach { cards.add(it) }
             }
         }
     }
 
-
-    Box() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .fillMaxHeight(0.9f)
-        ) {
-            DataListScroll(navController, cards)
+    Column {
+        Box(modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .fillMaxHeight(0.9f)) {
+            Column()
+            {
+                DataListScroll(navController, cards)
+            }
         }
-    }
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(SkyBlue)
-                .fillMaxHeight(0.1f),
+                .weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             navBar(navController = navController)
         }
+    }
 }
 
 @Composable
@@ -274,7 +272,7 @@ fun addNewListItem(navController: NavHostController, destination: String){
             },
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Magenta
+            containerColor = SkyBlue
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp

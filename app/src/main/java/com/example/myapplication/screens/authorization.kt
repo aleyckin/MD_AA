@@ -31,6 +31,7 @@ import com.example.myapplication.R
 import com.example.myapplication.components.LoginField
 import com.example.myapplication.components.PasswordField
 import com.example.myapplication.components.navButton
+import com.example.myapplication.database.MobileAppDataBase
 import com.example.myapplication.database.entities.Card
 import com.example.myapplication.database.entities.User
 import kotlinx.coroutines.Dispatchers
@@ -43,14 +44,10 @@ fun Authorization(navController: NavHostController){
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            try {
-                val database = MobileAppDataBase.getInstance(context.applicationContext)
-                database.userDao().getAll().collect { data ->
-                    users.clear()
-                    users.addAll(data)
-                }
-            } catch (e: Exception) {
-                Log.e("DatabaseError", "Error accessing database", e)
+            val database = MobileAppDataBase.getInstance(context)
+            database.userDao().getAll().collect { data ->
+                users.clear()
+                data.forEach { users.add(it) }
             }
         }
     }
