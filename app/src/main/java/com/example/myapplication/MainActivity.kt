@@ -19,12 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,11 +43,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.myapplication.database.MobileAppDataBase
 import com.example.myapplication.screens.Authorization
-import com.example.myapplication.screens.CreateCard
-import com.example.myapplication.screens.EditCard
+import com.example.myapplication.screens.EditCardScreen
+import com.example.myapplication.screens.EditUserScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.screens.MainScreen
 import com.example.myapplication.screens.Registration
@@ -69,11 +74,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(navController: NavHostController){
     NavHost(
         navController = navController, startDestination = "authorization"
     ) {
+
         composable("authorization") {
             Authorization(navController = navController)
         }
@@ -83,14 +90,22 @@ fun AppNavigation(navController: NavHostController){
         composable("registration") {
             Registration(navController = navController)
         }
-        composable("createCard") {
-            CreateCard(navController = navController)
-        }
         composable("userSettings") {
             UserSettings(navController = navController)
         }
-        composable("editCard") {
-            EditCard(navController = navController)
+        composable("editcard") {
+            EditCardScreen(navController = navController)
+        }
+        composable(
+            "editcard/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType }) //С аргументом
+        ) { backStackEntry ->
+            backStackEntry.arguments?.let {
+                EditCardScreen(navController = navController, cardId = it.getInt("id"))
+            }
+        }
+        composable("edituser"){
+            EditUserScreen(navController = navController)
         }
     }
 }

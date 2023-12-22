@@ -83,32 +83,6 @@ abstract class MobileAppDataBase : RoomDatabase() {
                         userId = 2
                     )
                 )
-                cardDao.insert(
-                    Card(
-                        name = "Феррари Имба",
-                        location = "г. Ульяновск",
-                        image = BitmapFactory.decodeResource(
-                            appContext.resources,
-                            R.drawable.ferrari_laferrari_car2
-                        ),
-                        mileage = 7322,
-                        price = 125000,
-                        userId = 1
-                    )
-                )
-                cardDao.insert(
-                    Card(
-                        name = "Феррари Два",
-                        location = "г. Ульяновск",
-                        image = BitmapFactory.decodeResource(
-                            appContext.resources,
-                            R.drawable.ferrari_laferrari_car2
-                        ),
-                        mileage = 1233,
-                        price = 15000,
-                        userId = 2
-                    )
-                )
             }
         }
     }

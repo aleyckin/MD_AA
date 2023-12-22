@@ -41,7 +41,7 @@ fun navBar(navController: NavHostController) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         navItem(navController = navController, ImageId = R.drawable.home_image, "mainScreen")
-        navItem(navController = navController, ImageId = R.drawable.note_image, "createCard")
+        navItem(navController = navController, ImageId = R.drawable.note_image, "editcard")
         navItem(navController = navController, ImageId = R.drawable.profile_image, "userSettings")
     }
 }

@@ -70,7 +70,7 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     }
-
+    
     Column {
         Box(modifier = Modifier
             .padding(horizontal = 10.dp)
@@ -122,10 +122,6 @@ inline fun <reified T> List<*>.isListOf(): Boolean {
 fun CardListItem(item: Card, navController: NavHostController){
     val context = LocalContext.current
 
-    val isExpanded = remember {
-        mutableStateOf(false)
-    }
-
     val showDialog = remember {
         mutableStateOf(false)
     }
@@ -158,24 +154,14 @@ fun CardListItem(item: Card, navController: NavHostController){
                     modifier = Modifier.padding(8.dp)
                 ){
                     Text(
-                        text = "${item.name} | ${item.location} | ${item.mileage} | ${item.price}",
+                        text = "Название: ${item.name} \nРасположение: ${item.location} \nПробег: ${item.mileage} \nЦена: ${item.price}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                }
-            }
-            AnimatedVisibility(
-                visible = isExpanded.value,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ){
-                    DataListItemButton("Изменить", Color.Yellow, Color.White, onClickAction = {
-                        navController.navigate("editstory/${item.id}")
+                    DataListItemButton("Изменить", Color.LightGray, Color.White, onClickAction = {
+                        navController.navigate("editcard/${item.id}")
                     })
-                    DataListItemButton("Удалить", Color.Red, Color.White, onClickAction = {
+                    DataListItemButton("Удалить", Color.Black, Color.White, onClickAction = {
                         showDialog.value = !showDialog.value
                     })
                 }
@@ -200,7 +186,7 @@ fun CardListItem(item: Card, navController: NavHostController){
             }
         }
         delete.value = !delete.value
-        navController.navigate("story")
+        navController.navigate("mainScreen")
     }
 }
 
@@ -272,7 +258,7 @@ fun addNewListItem(navController: NavHostController, destination: String){
             },
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(
-            containerColor = SkyBlue
+            containerColor = Color.White
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp
@@ -285,7 +271,7 @@ fun addNewListItem(navController: NavHostController, destination: String){
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Image(painter = painterResource(id = R.drawable.login),
+                Image(painter = painterResource(id = R.drawable.plus),
                     contentDescription = "additem",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
