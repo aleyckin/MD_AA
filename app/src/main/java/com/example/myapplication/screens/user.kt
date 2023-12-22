@@ -19,37 +19,48 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.myapplication.GlobalUser
+import com.example.myapplication.MobileApp
 import com.example.myapplication.R
+import com.example.myapplication.components.ActiveButton
 import com.example.myapplication.components.LoginField
+import com.example.myapplication.components.PlaceholderInputField
 import com.example.myapplication.components.navBar
 import com.example.myapplication.database.MobileAppDataBase
+import com.example.myapplication.database.entities.Card
 import com.example.myapplication.database.entities.User
+import com.example.myapplication.database.viewmodels.MobileAppViewModelProvider
+import com.example.myapplication.database.viewmodels.UserViewModel
 import com.example.myapplication.ui.theme.SkyBlue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun UserSettings(navController: NavHostController) {
+fun UserSettings(navController: NavHostController,
+                 userViewModel: UserViewModel = viewModel(factory = MobileAppViewModelProvider.Factory)) {
     val context = LocalContext.current
-
     val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val adsCount = remember { mutableStateOf(0) }
-    val userId = 1
+    val userId = GlobalUser.getInstance().getUser()?.id!!
 
-    userId?.let {
-        LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                val user = MobileAppDataBase.getInstance(context).userDao().getById(userId!!)
-                login.value = user!!.login
-                password.value = user!!.password
-                adsCount.value = MobileAppDataBase.getInstance(context).userDao().getAdsCount(userId)?: 0
+    LaunchedEffect(Unit) {
+        userId?.let {
+            userViewModel.getUser(userId).collect {
+                if (it != null) {
+                    login.value = it.login
+                }
+                if (it != null) {
+                    password.value = it.password
+                }
             }
         }
     }
@@ -59,7 +70,7 @@ fun UserSettings(navController: NavHostController) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+                ) {
                 Image(
                     painter = painterResource(id = R.drawable.user),
                     contentDescription = "login",
@@ -67,9 +78,17 @@ fun UserSettings(navController: NavHostController) {
                     modifier = Modifier
                         .size(300.dp)
                 )
-                LoginField(text = "Логин пользователя: ${login.value}")
-                LoginField(text = "Пароль пользователя: ${password.value}")
-                LoginField(text = "Количество объявлений пользователя: ${adsCount.value}")
+                PlaceholderInputField(label = "Логин пользователя: ${login.value}", isSingleLine = true, onTextChanged = {newlogin ->
+                    login.value = newlogin})
+                PlaceholderInputField(label = "Пароль пользователя: ${password.value}", isSingleLine = true, onTextChanged = {newpassword ->
+                    password.value = newpassword})
+                ActiveButton(label = "Сохранить изменения", backgroundColor = SkyBlue, textColor = Color.Black, onClickAction =
+                {
+                    userViewModel.updateUser(User(
+                        login = login.value,
+                        password = password.value
+                    ))
+                })
             }
         }
         Column(modifier = Modifier

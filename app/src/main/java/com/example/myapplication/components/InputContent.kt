@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -66,4 +67,53 @@ fun ActiveButton(label: String, backgroundColor: Color, textColor: Color, onClic
             color = textColor
         )
     }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlaceholderInputFieldAuth(label: String, startValue: String? = null, isSingleLine: Boolean, onTextChanged: (String) -> Unit){
+    var text = remember { mutableStateOf("") }
+    startValue?.let{
+        text.value = startValue
+    }
+    OutlinedTextField(
+        value = text.value,
+        onValueChange = {
+            text.value = it
+            onTextChanged(it)
+        },
+        placeholder = {
+            Text(label)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, start = 16.dp, bottom = 8.dp, end = 16.dp),
+        shape = RoundedCornerShape(10.dp),
+        singleLine = isSingleLine
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordInputField(label: String, startValue: String? = null, onPasswordChanged: (String) -> Unit){
+    var text = remember { mutableStateOf("") }
+    startValue?.let{
+        text.value = startValue
+    }
+
+    OutlinedTextField(
+        value = text.value,
+        onValueChange = {
+            text.value = it
+            onPasswordChanged(it)
+        },
+        placeholder = {
+            Text(label)
+        },
+        visualTransformation = PasswordVisualTransformation(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, start = 16.dp, bottom = 8.dp, end = 16.dp),
+        shape = RoundedCornerShape(10.dp))
 }

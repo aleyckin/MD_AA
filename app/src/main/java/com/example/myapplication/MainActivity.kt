@@ -48,6 +48,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.myapplication.database.MobileAppDataBase
+import com.example.myapplication.database.entities.User
 import com.example.myapplication.screens.Authorization
 import com.example.myapplication.screens.EditCardScreen
 import com.example.myapplication.screens.EditUserScreen
@@ -106,6 +107,28 @@ fun AppNavigation(navController: NavHostController){
         }
         composable("edituser"){
             EditUserScreen(navController = navController)
+        }
+    }
+}
+
+class GlobalUser private constructor() {
+    private var user: User? = null
+
+    fun setUser(user: User?) {
+        this.user = user
+    }
+
+    fun getUser(): User? {
+        return user
+    }
+
+    companion object {
+        private var instance: GlobalUser? = null
+
+        fun getInstance(): GlobalUser {
+            return instance ?: synchronized(this) {
+                instance ?: GlobalUser().also { instance = it }
+            }
         }
     }
 }

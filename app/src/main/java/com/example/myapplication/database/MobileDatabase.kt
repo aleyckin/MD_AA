@@ -53,8 +53,8 @@ abstract class MobileAppDataBase : RoomDatabase() {
         private suspend fun initialDataBase(appContext: Context) {
             INSTANCE?.let { database ->
                 val userDao = database.userDao()
-                userDao.insert(User(id = 1, login = "Иван", password = "1234",))
-                userDao.insert(User(id = 2, login = "Леонель Месси", password = "4321",))
+                userDao.insert(User(id = 1, login = "Margen", password = "1234",))
+                userDao.insert(User(id = 2, login = "Leonel Messi", password = "4321",))
 
                 val cardDao = database.cardDao()
                 cardDao.insert(

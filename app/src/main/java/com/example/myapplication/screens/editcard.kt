@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.myapplication.R
@@ -45,12 +46,16 @@ import com.example.myapplication.components.navBar
 import com.example.myapplication.components.navButton
 import com.example.myapplication.database.MobileAppDataBase
 import com.example.myapplication.database.entities.Card
+import com.example.myapplication.database.viewmodels.CardViewModel
+import com.example.myapplication.database.viewmodels.MobileAppViewModelProvider
 import com.example.myapplication.ui.theme.SkyBlue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun EditCardScreen(navController: NavHostController, cardId: Int? = null) {
+fun EditCardScreen(navController: NavHostController,
+                   cardViewModel: CardViewModel = viewModel( factory = MobileAppViewModelProvider.Factory),
+                   cardId: Int? = null) {
     val context = LocalContext.current
 
     val image = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeResource(context.resources, R.drawable.ferrari_laferrari_car2)) }
@@ -76,15 +81,24 @@ fun EditCardScreen(navController: NavHostController, cardId: Int? = null) {
         }
     }
 
-    cardId?.let{
-        LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                val card = MobileAppDataBase.getInstance(context).cardDao().getById(cardId!!)
-                image.value = card!!.image
-                name.value = card!!.name
-                location.value = card!!.location
-                price.value = card!!.price
-                mileage.value = card!!.mileage
+    LaunchedEffect(Unit) {
+        cardId?.let {
+            cardViewModel.getCardById(cardId).collect {
+                if (it != null) {
+                    image.value = it.image
+                }
+                if (it != null) {
+                    name.value = it.name
+                }
+                if (it != null) {
+                    location.value = it.location
+                }
+                if (it != null) {
+                    mileage.value = it.mileage
+                }
+                if (it != null) {
+                    price.value = it.price
+                }
             }
         }
     }

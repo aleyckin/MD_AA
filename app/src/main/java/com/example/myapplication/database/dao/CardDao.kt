@@ -1,5 +1,6 @@
 package com.example.myapplication.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -12,13 +13,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CardDao {
     @Query("select * from cards")
-    fun getAll(): Flow<List<Card>>
+    fun getAll(): PagingSource<Int, Card>
 
     @Query("select * from cards where cards.id = :id")
-    fun getById(id: Int): Card?
+    fun getById(id: Int): Flow<Card?>
 
     @Query("select * from cards where cards.user_id = :userId")
-    fun getByUserId(userId: Int): Flow<List<Card>>
+    fun getByUserId(userId: Int): PagingSource<Int, Card>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(card: Card)

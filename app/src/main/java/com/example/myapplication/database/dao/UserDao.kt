@@ -19,7 +19,10 @@ interface UserDao {
     fun getAll(): Flow<List<User>>
 
     @Query("select * from users where users.id = :id")
-    fun getById(id: Int): User?
+    fun getById(id: Int): Flow<User?>
+
+    @Query("select * from users where users.login = :login")
+    suspend fun getByLogin(login: String): User?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(user: User)
@@ -30,6 +33,6 @@ interface UserDao {
     @Delete
     suspend fun delete(user: User)
 
-    @Query("select count(*) from cards where user_id = :userId")
-    fun getAdsCount(userId: Int): Int?
+    @Query("SELECT * FROM users WHERE login = :login AND password = :password")
+    fun getUserByLoginAndPassword(login: String, password: String): User?
 }

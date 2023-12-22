@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -49,35 +51,48 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
+import com.example.myapplication.GlobalUser
 import com.example.myapplication.R
 import com.example.myapplication.database.MobileAppDataBase
+import com.example.myapplication.database.viewmodels.CardViewModel
+import com.example.myapplication.database.viewmodels.MobileAppViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController,
+               cardViewModel: CardViewModel = viewModel(factory = MobileAppViewModelProvider.Factory)) {
     val context = LocalContext.current
-    val cards = remember { mutableStateListOf<Card>() }
+    val cards = cardViewModel.getAllCards.collectAsLazyPagingItems()
+    //val cards = cardViewModel.getCardByUserId(GlobalUser.getInstance().getUser()?.id!!).collectAsLazyPagingItems()
 
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val database = MobileAppDataBase.getInstance(context)
-            database.cardDao().getAll().collect { data ->
-                cards.clear()
-                data.forEach { cards.add(it) }
-            }
-        }
-    }
-    
     Column {
         Box(modifier = Modifier
             .padding(horizontal = 10.dp)
             .fillMaxHeight(0.9f)) {
             Column()
             {
-                DataListScroll(navController, cards)
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    item {
+                        addNewListItem(navController, "editcard")
+                    }
+                    items(
+                        count = cards.itemCount,
+                        key = cards.itemKey { item -> item.id!! }
+                    ) { index: Int ->
+                        val card: Card? = cards[index]
+                        if (card != null) {
+                            CardListItem(item = card, navController = navController)
+                        }
+                    }
+                }
             }
         }
         Column(
