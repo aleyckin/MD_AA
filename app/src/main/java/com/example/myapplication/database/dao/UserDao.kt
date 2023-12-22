@@ -29,4 +29,7 @@ interface UserDao {
 
     @Delete
     suspend fun delete(user: User)
+
+    @Query("select count(*) from cards where user_id = :userId")
+    fun getAdsCount(userId: Int): Int?
 }

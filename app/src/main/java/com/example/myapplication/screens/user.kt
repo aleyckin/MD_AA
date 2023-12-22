@@ -40,6 +40,7 @@ fun UserSettings(navController: NavHostController) {
 
     val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    val adsCount = remember { mutableStateOf(0) }
     val userId = 1
 
     userId?.let {
@@ -48,6 +49,7 @@ fun UserSettings(navController: NavHostController) {
                 val user = MobileAppDataBase.getInstance(context).userDao().getById(userId!!)
                 login.value = user!!.login
                 password.value = user!!.password
+                adsCount.value = MobileAppDataBase.getInstance(context).userDao().getAdsCount(userId)?: 0
             }
         }
     }
@@ -67,6 +69,7 @@ fun UserSettings(navController: NavHostController) {
                 )
                 LoginField(text = "Логин пользователя: ${login.value}")
                 LoginField(text = "Пароль пользователя: ${password.value}")
+                LoginField(text = "Количество объявлений пользователя: ${adsCount.value}")
             }
         }
         Column(modifier = Modifier
