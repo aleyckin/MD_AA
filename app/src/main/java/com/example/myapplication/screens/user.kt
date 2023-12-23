@@ -51,12 +51,15 @@ fun UserSettings(navController: NavHostController,
     val password = remember { mutableStateOf("") }
     val userId = GlobalUser.getInstance().getUser()?.id?: 1
 
-    userId?.let {
-        LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                val user = MobileAppDataBase.getInstance(context).userDao().getById(userId!!)
-                login.value = user!!.login
-                password.value = user!!.password
+    LaunchedEffect(Unit) {
+        userId?.let {
+            userViewModel.getUser(userId).collect {
+                if (it != null) {
+                    login.value = it.login
+                }
+                if (it != null) {
+                    password.value = it.password
+                }
             }
         }
     }

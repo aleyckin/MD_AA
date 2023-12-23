@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 class UserViewModel(private val userRepository: UserRepository): ViewModel() {
     val getAllUsers = userRepository.getAllUsers()
 
-    suspend fun getUser(id: Int): User? = userRepository.getUserById(id)
+    suspend fun getUser(id: Int): Flow<User?> = userRepository.getUserById(id)
 
     fun updateUser(user: User) = viewModelScope.launch {
         userRepository.updateUser(user)
