@@ -68,8 +68,8 @@ import kotlinx.coroutines.withContext
 fun MainScreen(navController: NavHostController,
                cardViewModel: CardViewModel = viewModel(factory = MobileAppViewModelProvider.Factory)) {
     val context = LocalContext.current
+
     val cards = cardViewModel.getAllCards.collectAsLazyPagingItems()
-    //val cards = cardViewModel.getCardByUserId(GlobalUser.getInstance().getUser()?.id!!).collectAsLazyPagingItems()
 
     Column {
         Box(modifier = Modifier
@@ -77,8 +77,8 @@ fun MainScreen(navController: NavHostController,
             .fillMaxHeight(0.9f)) {
             Column()
             {
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(1)
                 ) {
                     item {
                         addNewListItem(navController, "editcard")

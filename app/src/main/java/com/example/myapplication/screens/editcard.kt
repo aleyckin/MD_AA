@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.myapplication.GlobalUser
 import com.example.myapplication.R
 import com.example.myapplication.components.ActiveButton
 import com.example.myapplication.components.LoginField
@@ -46,11 +47,14 @@ import com.example.myapplication.components.navBar
 import com.example.myapplication.components.navButton
 import com.example.myapplication.database.MobileAppDataBase
 import com.example.myapplication.database.entities.Card
+import com.example.myapplication.database.entities.User
 import com.example.myapplication.database.viewmodels.CardViewModel
 import com.example.myapplication.database.viewmodels.MobileAppViewModelProvider
+import com.example.myapplication.database.viewmodels.UserViewModel
 import com.example.myapplication.ui.theme.SkyBlue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.log
 
 @Composable
 fun EditCardScreen(navController: NavHostController,
@@ -103,41 +107,6 @@ fun EditCardScreen(navController: NavHostController,
         }
     }
 
-    val edit = remember { mutableStateOf(false) }
-    if (edit.value){
-        LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                cardId?.let {
-                    MobileAppDataBase.getInstance(context).cardDao()
-                        .update(
-                            Card(
-                                id = cardId,
-                                name = name.value,
-                                location = location.value,
-                                price = price.value,
-                                mileage = mileage.value,
-                                image = image.value,
-                                userId = 1)
-                        )
-
-                } ?: run {
-                    MobileAppDataBase.getInstance(context).cardDao()
-                        .insert(
-                            Card(
-                                name = name.value,
-                                location = location.value,
-                                price = price.value,
-                                mileage = mileage.value,
-                                image = image.value,
-                                userId = 1)
-                        )
-                }
-            }
-        }
-        edit.value = !edit.value
-        navController.navigate("mainScreen")
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -174,34 +143,52 @@ fun EditCardScreen(navController: NavHostController,
                 price.value = newPrice.toIntOrNull() ?: 10000
             })
         ActiveButton(label = "Сохранить", backgroundColor = SkyBlue, textColor = Color.Black, onClickAction = {
-            edit.value = !edit.value
+            cardId?.let {
+                cardViewModel.updateCard(
+                    Card(
+                        id = cardId,
+                        image = image.value,
+                        name = name.value,
+                        location = location.value,
+                        mileage = mileage.value,
+                        price = price.value,
+                        userId = GlobalUser.getInstance().getUser()?.id ?: 1
+                    )
+                )
+            } ?: run {
+                cardViewModel.insertCard(
+                    Card(
+                        image = image.value,
+                        name = name.value,
+                        location = location.value,
+                        mileage = mileage.value,
+                        price = price.value,
+                        userId = GlobalUser.getInstance().getUser()?.id ?: 1
+                    )
+                )
+            }
+            navController.navigate("mainScreen")
         })
         navButton(navController = navController, destination = "mainScreen", label = "Назад", backgroundColor = SkyBlue, textColor = Color.Black)
     }
 }
 
 @Composable
-fun EditUserScreen(navController: NavHostController){
+fun EditUserScreen(navController: NavHostController,
+                   userViewModel: UserViewModel = viewModel(
+                       factory = MobileAppViewModelProvider.Factory)){
     val context = LocalContext.current
 
-    val photo = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeResource(context.resources, R.drawable.login)) }
-    val name = remember { mutableStateOf("") }
+    var userId = remember { mutableStateOf(0) }
+    val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
-    val imageData = remember { mutableStateOf<Uri?>(null) }
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {uri: Uri? ->
-            imageData.value = uri
-        }
-    imageData.value?.let {
-        if (Build.VERSION.SDK_INT < 28) {
-            photo.value = MediaStore.Images
-                .Media.getBitmap(context.contentResolver, imageData.value)
 
-        } else {
-            val source = ImageDecoder
-                .createSource(context.contentResolver, imageData.value!!)
-            photo.value = ImageDecoder.decodeBitmap(source)
+    LaunchedEffect(Unit) {
+        GlobalUser.getInstance().getUser()?.let { user ->
+            userId.value = user!!.id!!
+            login.value = user!!.login
+            password.value = user!!.password
         }
     }
 
@@ -211,27 +198,23 @@ fun EditUserScreen(navController: NavHostController){
             .padding(bottom = 8.dp),
         verticalArrangement = Arrangement.Bottom
     ) {
-        Image(
-            bitmap = photo.value.asImageBitmap(),
-            contentDescription = "editplaceholder",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(384.dp)
-                .padding(8.dp)
-                .align(Alignment.CenterHorizontally))
-        ActiveButton(label = "Выбрать фото", backgroundColor = SkyBlue, textColor = Color.Black, onClickAction = {
-            launcher.launch("image/*")
-        })
-        PlaceholderInputField(label = "Никнейм", isSingleLine = true,
-            startValue = name.value, onTextChanged = { newName ->
-                name.value = newName
+        PlaceholderInputField(label = "Логин", isSingleLine = true,
+            startValue = login.value, onTextChanged = { newName ->
+                login.value = newName
             })
         PlaceholderInputField(label = "Пароль", isSingleLine = true,
             startValue = password.value, onTextChanged = { newPassword ->
                 password.value = newPassword
             })
         ActiveButton(label = "Сохранить", backgroundColor = SkyBlue, textColor = Color.Black, onClickAction = {
-            //edit.value = !edit.value
+            userViewModel.updateUser(
+                User(
+                    id = userId.value,
+                    login = login.value,
+                    password = password.value,
+                )
+            )
+            navController.navigate("userSettings")
         })
     }
 }

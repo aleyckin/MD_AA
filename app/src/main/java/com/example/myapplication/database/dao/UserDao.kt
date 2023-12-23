@@ -19,7 +19,7 @@ interface UserDao {
     fun getAll(): Flow<List<User>>
 
     @Query("select * from users where users.id = :id")
-    fun getById(id: Int): Flow<User?>
+    fun getById(id: Int): User?
 
     @Query("select * from users where users.login = :login")
     suspend fun getByLogin(login: String): User?
@@ -35,4 +35,5 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE login = :login AND password = :password")
     fun getUserByLoginAndPassword(login: String, password: String): User?
+
 }

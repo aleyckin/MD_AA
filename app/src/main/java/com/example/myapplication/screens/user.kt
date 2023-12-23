@@ -49,18 +49,14 @@ fun UserSettings(navController: NavHostController,
     val context = LocalContext.current
     val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    val adsCount = remember { mutableStateOf(0) }
-    val userId = GlobalUser.getInstance().getUser()?.id!!
+    val userId = GlobalUser.getInstance().getUser()?.id?: 1
 
-    LaunchedEffect(Unit) {
-        userId?.let {
-            userViewModel.getUser(userId).collect {
-                if (it != null) {
-                    login.value = it.login
-                }
-                if (it != null) {
-                    password.value = it.password
-                }
+    userId?.let {
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                val user = MobileAppDataBase.getInstance(context).userDao().getById(userId!!)
+                login.value = user!!.login
+                password.value = user!!.password
             }
         }
     }
@@ -85,6 +81,7 @@ fun UserSettings(navController: NavHostController,
                 ActiveButton(label = "Сохранить изменения", backgroundColor = SkyBlue, textColor = Color.Black, onClickAction =
                 {
                     userViewModel.updateUser(User(
+                        id = userId,
                         login = login.value,
                         password = password.value
                     ))

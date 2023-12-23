@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 class UserViewModel(private val userRepository: UserRepository): ViewModel() {
     val getAllUsers = userRepository.getAllUsers()
 
-    suspend fun getUser(id: Int): Flow<User?> = userRepository.getUserById(id)
+    suspend fun getUser(id: Int): User? = userRepository.getUserById(id)
 
     fun updateUser(user: User) = viewModelScope.launch {
         userRepository.updateUser(user)
@@ -40,10 +40,10 @@ class UserViewModel(private val userRepository: UserRepository): ViewModel() {
 
     fun authUser(user: User) = viewModelScope.launch {
         val globalUser = userRepository.getUserByLogin(user.login)
-        globalUser?.let {
-            if (user.password.isNotEmpty() && user.password == globalUser.password){
-                GlobalUser.getInstance().setUser(globalUser)
-            }
+        if (user.password.isNotEmpty() && user.password == globalUser?.password){
+            GlobalUser.getInstance().setUser(globalUser)
+            val user123 = GlobalUser.getInstance().getUser()
+            println(user123)
         }
     }
 

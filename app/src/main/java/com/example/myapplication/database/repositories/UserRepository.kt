@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     fun getAllUsers(): Flow<List<User>>
 
-    suspend fun getUserById(id: Int):  Flow<User?>
+    suspend fun getUserById(id: Int):  User?
 
     suspend fun getUserByLogin(login: String): User?
 
@@ -18,5 +18,4 @@ interface UserRepository {
     suspend fun deleteUser(user: User)
 
     suspend fun getUserByLoginAndPassword(login: String, password: String): User?
-
 }

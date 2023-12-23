@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class OfflineUserRepository(private val userDao: UserDao): UserRepository {
     override fun getAllUsers(): Flow<List<User>> = userDao.getAll()
 
-    override suspend fun getUserById(id: Int): Flow<User?> = userDao.getById(id)
+    override suspend fun getUserById(id: Int): User? = userDao.getById(id)
 
     override suspend fun getUserByLogin(login: String): User? = userDao.getByLogin(login)
 
