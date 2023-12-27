@@ -89,6 +89,10 @@ fun UserSettings(navController: NavHostController,
                         password = password.value
                     ))
                 })
+                ActiveButton(label = "Выход из аккаунта", backgroundColor = Color.Red, textColor = Color.White, onClickAction = {
+                    GlobalUser.getInstance().setUser(null)
+                    navController.navigate("authorization")
+                })
             }
         }
         Column(modifier = Modifier

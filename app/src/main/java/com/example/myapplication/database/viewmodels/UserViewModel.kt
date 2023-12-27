@@ -42,8 +42,6 @@ class UserViewModel(private val userRepository: UserRepository): ViewModel() {
         val globalUser = userRepository.getUserByLogin(user.login)
         if (user.password.isNotEmpty() && user.password == globalUser?.password){
             GlobalUser.getInstance().setUser(globalUser)
-            val user123 = GlobalUser.getInstance().getUser()
-            println(user123)
         }
     }
 

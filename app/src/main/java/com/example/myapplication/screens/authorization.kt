@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.myapplication.GlobalUser
 import com.example.myapplication.R
 import com.example.myapplication.components.ActiveButton
 import com.example.myapplication.components.LoginField
@@ -50,8 +51,16 @@ import kotlinx.coroutines.withContext
 @Composable
 fun Authorization(navController: NavHostController,
                   userViewModel: UserViewModel = viewModel( factory = MobileAppViewModelProvider.Factory )){
-    val context = LocalContext.current
-    val users = userViewModel.getAllUsers.collectAsState(emptyList()).value
+
+    val message = remember { mutableStateOf("") }
+    val isAuthorizated = remember { mutableStateOf(false) }
+
+    if(GlobalUser.getInstance().getUser() != null && !isAuthorizated.value) {
+        isAuthorizated.value = !isAuthorizated.value
+        message.value = ""
+        navController.navigate("mainScreen")
+    }
+
     val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
@@ -71,10 +80,20 @@ fun Authorization(navController: NavHostController,
             .fillMaxWidth()
             .padding(8.dp),
             contentAlignment = Alignment.Center) {
-            Text("Продажа автомобилей",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+            Column {
+                Text("Продажа автомобилей",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+                if (message.value.isNotEmpty()) {
+                    Text(
+                        message.value,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.Red
+                    )
+                }
+            }
         }
         PlaceholderInputFieldAuth(label = "Логин", isSingleLine = true, onTextChanged = { newlogin ->
             login.value = newlogin
@@ -92,7 +111,7 @@ fun Authorization(navController: NavHostController,
                             password = password.value,
                         )
                     )
-                    navController.navigate("mainScreen")
+                    message.value = "Неправильный логин или пароль."
                 }
             })
         navButton(navController = navController, destination = "registration", label = "Регистрация",

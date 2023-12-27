@@ -59,16 +59,17 @@ import com.example.myapplication.R
 import com.example.myapplication.database.MobileAppDataBase
 import com.example.myapplication.database.viewmodels.CardViewModel
 import com.example.myapplication.database.viewmodels.MobileAppViewModelProvider
+import com.example.myapplication.database.viewmodels.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
 fun MainScreen(navController: NavHostController,
-               cardViewModel: CardViewModel = viewModel(factory = MobileAppViewModelProvider.Factory)) {
-    val context = LocalContext.current
-
+               cardViewModel: CardViewModel = viewModel(factory = MobileAppViewModelProvider.Factory),
+               userViewModel: UserViewModel = viewModel(factory = MobileAppViewModelProvider.Factory)) {
     val cards = cardViewModel.getAllCards.collectAsLazyPagingItems()
 
     Column {
@@ -89,7 +90,7 @@ fun MainScreen(navController: NavHostController,
                     ) { index: Int ->
                         val card: Card? = cards[index]
                         if (card != null) {
-                            CardListItem(item = card, navController = navController)
+                            CardListItem(item = card, navController = navController, userViewModel)
                         }
                     }
                 }
@@ -107,35 +108,17 @@ fun MainScreen(navController: NavHostController,
     }
 }
 
-@Composable
-fun <T : Any> DataListScroll(navController: NavHostController, dataList: List<T>){
-    LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-    ){
-        item {
-            when {
-                dataList.isListOf<Card>() -> addNewListItem(navController, "editcard")
-
-            }
-        }
-        items(dataList){ item ->
-            when(item){
-                is Card -> CardListItem(item = item, navController = navController)
-            }
-        }
-    }
-}
-
 inline fun <reified T> List<*>.isListOf(): Boolean {
     return isNotEmpty() && all { it is T }
 }
 
-
 @Composable
-fun CardListItem(item: Card, navController: NavHostController){
+fun CardListItem(item: Card, navController: NavHostController, userViewModel: UserViewModel){
     val context = LocalContext.current
+
+    val userLogin = remember {
+        mutableStateOf("")
+    }
 
     val showDialog = remember {
         mutableStateOf(false)
@@ -143,6 +126,15 @@ fun CardListItem(item: Card, navController: NavHostController){
 
     val delete = remember {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(Unit)
+    {
+        userViewModel.getUser(item.userId).collect{
+            if (it != null) {
+                userLogin.value = it.login
+            }
+        }
     }
 
     Card(
@@ -169,7 +161,7 @@ fun CardListItem(item: Card, navController: NavHostController){
                     modifier = Modifier.padding(8.dp)
                 ){
                     Text(
-                        text = "Название: ${item.name} \nРасположение: ${item.location} \nПробег: ${item.mileage} \nЦена: ${item.price}",
+                        text = "Название: ${item.name} \nРасположение: ${item.location} \nПробег: ${item.mileage} \nЦена: ${item.price} \nПродавец: ${userLogin.value}",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )

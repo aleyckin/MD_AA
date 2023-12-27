@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.myapplication.GlobalUser
 import com.example.myapplication.components.ActiveButton
 import com.example.myapplication.components.LoginField
 import com.example.myapplication.components.PasswordField
@@ -31,6 +32,13 @@ import com.example.myapplication.ui.theme.SkyBlue
 fun Registration(navController: NavHostController,
                  userViewModel: UserViewModel = viewModel(
                     factory = MobileAppViewModelProvider.Factory)) {
+    val isRegistrated = remember { mutableStateOf(false) }
+
+    if(GlobalUser.getInstance().getUser() != null && !isRegistrated.value) {
+        isRegistrated.value = !isRegistrated.value
+        navController.navigate("mainScreen")
+    }
+
     val login = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val repeatepassword = remember { mutableStateOf("") }
@@ -56,7 +64,6 @@ fun Registration(navController: NavHostController,
                         )
                     )
                 }
-                navController.navigate("authorization")
             })
         navButton(navController = navController, destination = "authorization",
             label = "Назад", backgroundColor = SkyBlue, textColor = Color.Black)

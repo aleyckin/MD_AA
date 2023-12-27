@@ -112,14 +112,14 @@ fun AppNavigation(navController: NavHostController){
 }
 
 class GlobalUser private constructor() {
-    private var user: User? = null
+    private var user = mutableStateOf<User?>(null)
 
     fun setUser(user: User?) {
-        this.user = user
+        this.user.value = user
     }
 
     fun getUser(): User? {
-        return user
+        return user.value
     }
 
     companion object {
